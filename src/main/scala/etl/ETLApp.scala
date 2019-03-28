@@ -1,5 +1,6 @@
 package hipages.sparkProject
 
+import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
@@ -30,10 +31,13 @@ object Runner {
       .appName("ETL App")
       .getOrCreate()
 
+     val schemaJson = spark.read.json("/FileStore/tables/source_data_schema.json").schema.json
+     val theSchema = DataType.fromJson(schemaJson).asInstanceOf[StructType]
+
     //Extract
-    val inputDf: DataFrame = spark
+    val inputDf = spark
       .read
-      // .schema(theSchema)
+      .schema(theSchema)
       .option("mode", "DROPMALFORMED")
       .option("charset", "UTF-8")
       .json(inputFile)
