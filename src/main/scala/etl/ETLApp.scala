@@ -1,7 +1,6 @@
 package hipages.sparkProject
 
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 /**
   * Use this to test the app locally, from sbt:
@@ -10,11 +9,7 @@ import org.apache.spark.{SparkConf, SparkContext}
   */
 object ETLLocalApp extends App {
   val (inputFile, outputFile) = (args(0), args(1))
-  val conf = new SparkConf()
-    .setMaster("local")
-    .setAppName("my awesome app")
-
-  Runner.run(conf, inputFile, outputFile)
+  Runner.run(inputFile, outputFile)
 }
 
 /**
@@ -24,15 +19,19 @@ object ETLApp extends App {
   val (inputFile, outputFile) = (args(0), args(1))
 
   // spark-submit command should supply all necessary config elements
-  Runner.run(new SparkConf(), inputFile, outputFile)
+  Runner.run(inputFile, outputFile)
 }
 
 object Runner {
-  def run(conf: SparkConf, inputFile: String, outputFile: String): Unit = {
-    val sc = new SparkContext(conf)
+  def run(inputFile: String, outputFile: String): Unit = {
+
+    implicit val spark = SparkSession.builder()
+      .enableHiveSupport()
+      .appName("ETL App")
+      .getOrCreate()
 
     //Extract
-    val inputDf: DataFrame = sc
+    val inputDf: DataFrame = spark
       .read
       // .schema(theSchema)
       .option("mode", "DROPMALFORMED")
