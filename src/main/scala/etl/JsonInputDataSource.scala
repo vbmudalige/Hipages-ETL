@@ -23,8 +23,8 @@ class JsonInputDataSource extends InputDataSource {
       .schema
       .json
 
-    val jsonSchema = DataType.
-      fromJson(schemaJson)
+    val jsonSchema = DataType
+      .fromJson(schemaJson)
       .asInstanceOf[StructType]
 
     val inputDf = spark

@@ -14,6 +14,7 @@ object Transformations {
     */
   def getUserActivities(df: DataFrame): DataFrame = {
 
+    // TODO All the hard coded field names should be moved to a separate property file
     df.withColumn("_tmp", split(col("url"), "\\/"))
       .select(col("user.id"), col("timestamp"), col("_tmp").getItem(2).as("url_level1_unedited"), col("_tmp").getItem(3).as("url_level2"), col("_tmp").getItem(4).as("url_level3"), col("action"))
       .withColumn("url_level1", expr("substring(url_level1_unedited, 5, length(url_level1_unedited) - 7)"))
