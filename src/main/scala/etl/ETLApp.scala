@@ -9,22 +9,22 @@ import org.apache.spark.sql.SparkSession
   * (+ select ETLLocalApp when prompted)
   */
 object ETLLocalApp extends App {
-  val (inputFile, outputFile) = (args(0), args(1))
-  Runner.run(inputFile, outputFile)
+  val (inputFile, outputFile, schemaPath) = (args(0), args(1), args(2))
+  Runner.run(inputFile, outputFile, schemaPath)
 }
 
 /**
   * Use this when submitting the app to a cluster with spark-submit
   **/
 object ETLApp extends App {
-  val (inputFile, outputFile) = (args(0), args(1))
+  val (inputFile, outputFile, schemaPath) = (args(0), args(1), args(2))
 
   // spark-submit command should supply all necessary config elements
-  Runner.run(inputFile, outputFile)
+  Runner.run(inputFile, outputFile, schemaPath)
 }
 
 object Runner {
-  def run(inputFile: String, outputFile: String): Unit = {
+  def run(inputFile: String, outputFile: String, schemaPath: String): Unit = {
 
     implicit val spark = SparkSession.builder()
       .enableHiveSupport()
@@ -32,8 +32,8 @@ object Runner {
       .getOrCreate()
 
     //This configs map should be provided as an external parameter to the jar in the actual implementation
-    val inputConfigs = Map("inputPath" -> "/FileStore/tables/source_data_schema.json"
-      , "schemaPath" -> "/FileStore/tables/source_data_schema.json"
+    val inputConfigs = Map("inputPath" -> inputFile
+      , "schemaPath" -> schemaPath
       , "charSet" -> "UTF-8")
 
     //TODO InputDataSource factory should be implemented to get the data source
@@ -51,7 +51,7 @@ object Runner {
     val outputDataSource: OutputDataSource = new CsvOutputDataSource()
 
     //This configs map should be provided as an external parameter to the jar in the actual implementation
-    val outputConfigs = Map("outputPath" -> "/FileStore/output/csv/")
+    val outputConfigs = Map("outputPath" -> outputFile)
 
     outputDataSource.saveOutputData(userActivitiesDf, outputConfigs)
     outputDataSource.saveOutputData(aggregatedEventsDf, outputConfigs)

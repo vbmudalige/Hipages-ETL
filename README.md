@@ -17,3 +17,6 @@ Unit tests need to be added to test the functionalities of the transformation lo
 
 ## Portability and Scaling
 I have implemented this job using Apache Spark framework therefore it will be really easy to scale horizontally by just increasing the number of executors. Spark is 100 times faster than Hadoop MapReduce. Spark is Polyglot and can be integrated with Hadoop ecosystem very easily. Therefore Spark is a great choice for this sort of batch processing use case. Spark jobs can be run in a YARN cluster or in a cloud service like Dataproc or EMR very easily and therefore it can be considered as a portable solution. 
+
+## Instructions
+ETLApp.scala is the starting point of the application. When the run method is executed, the extract, transform and load functions will run sequentially.
