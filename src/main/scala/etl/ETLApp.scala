@@ -1,7 +1,7 @@
 package hipages.sparkProject
 
-import org.apache.spark.sql.types.{DataType, StructType}
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import etl.{CsvOutputDataSource, JsonInputDataSource, OutputDataSource}
+import org.apache.spark.sql.SparkSession
 
 /**
   * Use this to test the app locally, from sbt:
@@ -31,24 +31,29 @@ object Runner {
       .appName("ETL App")
       .getOrCreate()
 
-     val schemaJson = spark.read.json("/FileStore/tables/source_data_schema.json").schema.json
-     val theSchema = DataType.fromJson(schemaJson).asInstanceOf[StructType]
+    //This configs map should be provided as an external parameter to the jar in the actual implementation
+    val inputConfigs = Map("inputPath" -> "/FileStore/tables/source_data_schema.json"
+      , "schemaPath" -> "/FileStore/tables/source_data_schema.json"
+      , "charSet" -> "UTF-8")
+
+    //TODO InputDataSource factory should be implemented to get the data source
 
     //Extract
-    val inputDf = spark
-      .read
-      .schema(theSchema)
-      .option("mode", "DROPMALFORMED")
-      .option("charset", "UTF-8")
-      .json(inputFile)
+    val inputDf = new JsonInputDataSource().getInputData(spark, inputConfigs)
 
     //Transform
-    val transformedDf = Transformations.getUserActivities(inputDf)
+    val userActivitiesDf = Transformations.getUserActivities(inputDf)
+    val aggregatedEventsDf = Transformations.getAggregatedEvents(inputDf)
+
+    //TODO OutputDataSource factory should be implemented to get the relevant data output source
 
     //Load
-    transformedDf
-      .write
-      .option("header", "true")
-      .csv(outputFile)
+    val outputDataSource: OutputDataSource = new CsvOutputDataSource()
+
+    //This configs map should be provided as an external parameter to the jar in the actual implementation
+    val outputConfigs = Map("outputPath" -> "/FileStore/output/csv/")
+
+    outputDataSource.saveOutputData(userActivitiesDf, outputConfigs)
+    outputDataSource.saveOutputData(aggregatedEventsDf, outputConfigs)
   }
 }
