@@ -1,6 +1,6 @@
 package hipages.sparkProject
 
-import etl.{CsvOutputDataSource, JsonInputDataSource, OutputDataSource}
+import etl.{CsvOutputDataSource, InputDataSource, JsonInputDataSource, OutputDataSource}
 import org.apache.spark.sql.SparkSession
 
 /**
@@ -36,7 +36,8 @@ object Runner {
     //TODO InputDataSource factory should be implemented to get the data source
 
     //Extract
-    val inputDf = new JsonInputDataSource().getInputData(spark, inputConfigs)
+    val inputDataSource: InputDataSource = new JsonInputDataSource()
+    val inputDf = inputDataSource.getInputData(spark, inputConfigs)
 
     //Transform
     val userActivitiesDf = Transformations.getUserActivities(inputDf)
