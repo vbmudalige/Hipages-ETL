@@ -20,3 +20,7 @@ I have implemented this job using Apache Spark framework therefore it will be re
 
 ## Instructions
 ETLApp.scala is the starting point of the application. When the run method is executed, the extract, transform and load functions will run sequentially.
+In order to run the app, just execute: **sbt "run events_json_path output_path"**
+
+### The last commit before the deadline
+https://github.com/vbmudalige/Hipages-ETL/commit/cf1b20f299b67c2349cfafc96e4ca69f050fe5f7

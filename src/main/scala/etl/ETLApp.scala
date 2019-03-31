@@ -9,31 +9,28 @@ import org.apache.spark.sql.SparkSession
   * (+ select ETLLocalApp when prompted)
   */
 object ETLLocalApp extends App {
-  val (inputFile, outputFile, schemaPath) = (args(0), args(1), args(2))
-  Runner.run(inputFile, outputFile, schemaPath)
+  val (inputFile, outputFile) = (args(0), args(1))
+  Runner.run(inputFile, outputFile)
 }
 
 /**
   * Use this when submitting the app to a cluster with spark-submit
   **/
 object ETLApp extends App {
-  val (inputFile, outputFile, schemaPath) = (args(0), args(1), args(2))
-
-  // spark-submit command should supply all necessary config elements
-  Runner.run(inputFile, outputFile, schemaPath)
+  val (inputFile, outputFile) = (args(0), args(1))
+  Runner.run(inputFile, outputFile)
 }
 
 object Runner {
-  def run(inputFile: String, outputFile: String, schemaPath: String): Unit = {
+  def run(inputFile: String, outputFile: String): Unit = {
 
-    implicit val spark = SparkSession.builder()
-      .enableHiveSupport()
+    implicit val spark = SparkSession
+      .builder()
       .appName("ETL App")
+      .config("spark.master", "local") // In a production environment, spark.master should be specified on the command line when you submit the app (ex spark-submit --master yarn)
       .getOrCreate()
 
-    //This configs map should be provided as an external parameter to the jar in the actual implementation
     val inputConfigs = Map("inputPath" -> inputFile
-      , "schemaPath" -> schemaPath
       , "charSet" -> "UTF-8")
 
     //TODO InputDataSource factory should be implemented to get the data source
@@ -50,10 +47,11 @@ object Runner {
     //Load
     val outputDataSource: OutputDataSource = new CsvOutputDataSource()
 
-    //This configs map should be provided as an external parameter to the jar in the actual implementation
-    val outputConfigs = Map("outputPath" -> outputFile)
+    //This configs should be extracted from the command line arguments in the actual implementation
+    val userActivitiesOutputConfigs = Map("outputPath" -> outputFile.concat("\\userActivities\\"), "partitioningCol" -> "activity")
+    val aggregateEventsOutputConfigs = Map("outputPath" -> outputFile.concat("\\aggregateEvents\\"), "partitioningCol" -> "time_bucket")
 
-    outputDataSource.saveOutputData(userActivitiesDf, outputConfigs)
-    outputDataSource.saveOutputData(aggregatedEventsDf, outputConfigs)
+    outputDataSource.saveOutputData(userActivitiesDf, userActivitiesOutputConfigs)
+    outputDataSource.saveOutputData(aggregatedEventsDf, aggregateEventsOutputConfigs)
   }
 }

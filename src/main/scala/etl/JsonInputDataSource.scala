@@ -1,6 +1,5 @@
 package etl
 
-import org.apache.spark.sql.types.{DataType, StructType}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class JsonInputDataSource extends InputDataSource {
@@ -14,22 +13,10 @@ class JsonInputDataSource extends InputDataSource {
     */
   override def getInputData(spark: SparkSession, configs: Map[String, String]): DataFrame = {
     val inputPath: String = configs("inputPath")
-    val schemaPath: String = configs("schemaPath")
-    val charSet: String = configs("charSet");
-
-    val schemaJson = spark
-      .read
-      .json(schemaPath)
-      .schema
-      .json
-
-    val jsonSchema = DataType
-      .fromJson(schemaJson)
-      .asInstanceOf[StructType]
+    val charSet: String = configs("charSet")
 
     val inputDf = spark
       .read
-      .schema(jsonSchema)
       .option("mode", "DROPMALFORMED")
       .option("charset", charSet)
       .json(inputPath)

@@ -1,6 +1,6 @@
 package etl
 
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, SaveMode}
 
 class CsvOutputDataSource extends OutputDataSource {
 
@@ -13,9 +13,13 @@ class CsvOutputDataSource extends OutputDataSource {
   override def saveOutputData(dataFrame: DataFrame, configs: Map[String, String]): Unit = {
 
     val outputPath: String = configs("outputPath")
+    val partitioningCol: String = configs("partitioningCol")
 
     dataFrame
+      .coalesce(1)
       .write
+      //      .partitionBy(partitioningCol)
+      .mode(SaveMode.Overwrite)
       .option("header", "true")
       .csv(outputPath)
   }
