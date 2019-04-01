@@ -27,10 +27,14 @@ lazy val root = (project in file(".")).
 
       "org.scalatest" %% "scalatest" % "3.0.1" % "test",
       "org.scalacheck" %% "scalacheck" % "1.13.4" % "test",
-      "com.holdenkarau" %% "spark-testing-base" % "2.3.0_0.9.0" % "test" 
+      "com.holdenkarau" %% "spark-testing-base" % "2.3.0_0.9.0" % "test",
+
+      "org.zalando" %% "spark-json-schema" % "0.6.1"
     ),
 
-    // uses compile classpath for the run task, including "provided" jar (cf http://stackoverflow.com/a/21803413/3827)
+    dependencyOverrides += "com.fasterxml.jackson.core" % "jackson-databind" % "2.6.7",
+
+      // uses compile classpath for the run task, including "provided" jar (cf http://stackoverflow.com/a/21803413/3827)
     run in Compile := Defaults.runTask(fullClasspath in Compile, mainClass in (Compile, run), runner in (Compile, run)).evaluated,
 
     scalacOptions ++= Seq("-deprecation", "-unchecked"),

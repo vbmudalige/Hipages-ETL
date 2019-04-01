@@ -9,20 +9,20 @@ import org.apache.spark.sql.SparkSession
   * (+ select ETLLocalApp when prompted)
   */
 object ETLLocalApp extends App {
-  val (inputFile, outputFile) = (args(0), args(1))
-  Runner.run(inputFile, outputFile)
+  val (inputFile, outputFile, schemaFile) = (args(0), args(1), args(2))
+  Runner.run(inputFile, outputFile, schemaFile)
 }
 
 /**
   * Use this when submitting the app to a cluster with spark-submit
   **/
 object ETLApp extends App {
-  val (inputFile, outputFile) = (args(0), args(1))
-  Runner.run(inputFile, outputFile)
+  val (inputFile, outputFile, schemaFile) = (args(0), args(1), args(2))
+  Runner.run(inputFile, outputFile, schemaFile)
 }
 
 object Runner {
-  def run(inputFile: String, outputFile: String): Unit = {
+  def run(inputFile: String, outputFile: String, schemaFile: String): Unit = {
 
     implicit val spark = SparkSession
       .builder()
@@ -31,6 +31,7 @@ object Runner {
       .getOrCreate()
 
     val inputConfigs = Map("inputPath" -> inputFile
+      , "schemaFile" -> schemaFile
       , "charSet" -> "UTF-8")
 
     //TODO InputDataSource factory should be implemented to get the data source

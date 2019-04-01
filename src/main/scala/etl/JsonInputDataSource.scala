@@ -1,6 +1,7 @@
 package etl
 
 import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.zalando.spark.jsonschema.SchemaConverter
 
 class JsonInputDataSource extends InputDataSource {
 
@@ -13,10 +14,14 @@ class JsonInputDataSource extends InputDataSource {
     */
   override def getInputData(spark: SparkSession, configs: Map[String, String]): DataFrame = {
     val inputPath: String = configs("inputPath")
+    val schemaPath: String = configs("schemaFile")
     val charSet: String = configs("charSet")
+
+    val schema = SchemaConverter.convert(schemaPath)
 
     val inputDf = spark
       .read
+      .schema(schema)
       .option("mode", "DROPMALFORMED")
       .option("charset", charSet)
       .json(inputPath)
